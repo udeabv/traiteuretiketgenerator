@@ -41,6 +41,7 @@ class ApplyController extends Controller {
 
                         // create new label for each product in excel
                         foreach ($productsContent as $product){
+                            $templateContent = File::get($file['template']);
                             Log::alert("product" . $product);
                             //Replace content
 
