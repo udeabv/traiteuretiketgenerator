@@ -1,7 +1,7 @@
 ## Traiteur Etiket Generator
 Generates Dymo .label files from product excel list.
 
-Website made with Laravel
+Website made with Laravel framework
 
 ##Configuration
 - 'exportFolder' => config/app.php 
