@@ -8,6 +8,7 @@ use Request;
 use Session;
 use Illuminate\Support\Facades\File;
 use Maatwebsite\Excel\Facades\Excel;
+use ZipArchive;
 class ApplyController extends Controller {
     public function upload() {
         // getting all of the post data
@@ -56,7 +57,7 @@ class ApplyController extends Controller {
                             $templateContent = str_replace("%gram%",$product->gram ,$templateContent);
 
                             //Create new label
-                            $exportFolder = config('app.exportFolder');
+                            $exportFolder = storage_path('app/file/');
                             $bytes_written = File::put($exportFolder . $product->naam . ".label", $templateContent);
                             if ($bytes_written === false) {
                                 Session::flash('error', 'cannot create new label file');
@@ -64,6 +65,21 @@ class ApplyController extends Controller {
                             }
                             Log::alert("File created: " . $product->naam . ".label");
                         }
+                        //ZIP and download
+                        $zip = new ZipArchive();
+                        $zip_name = time().".zip"; // Zip name
+                        $zip->open($zip_name,  ZipArchive::CREATE);
+
+                        foreach (glob(storage_path('app/file/').'/*.*') as $file ) {
+                            if(file_exists($file)){
+                                $zip->addFromString(basename($file),  file_get_contents($file));
+                            }
+                            else{
+                                echo"file does not exist";
+                            }
+                        }
+                        $zip->close();
+                        return response()->download($zip_name);
                     }
                     catch (FileNotFoundException $exception)
                     {
@@ -83,5 +99,22 @@ class ApplyController extends Controller {
                 return Redirect::to('create');
             }
         }
+
+    }
+    public function zipFiles(){
+        $zip = new ZipArchive();
+        $zip_name = time().".zip"; // Zip name
+        $zip->open($zip_name,  ZipArchive::CREATE);
+
+        foreach (glob(storage_path('app/file/').'/*.*') as $file ) {
+            if(file_exists($file)){
+                $zip->addFromString(basename($file),  file_get_contents($file));
+            }
+            else{
+                echo"file does not exist";
+            }
+        }
+        $zip->close();
+        return $zip_name;
     }
 }
